@@ -10,7 +10,7 @@ class Solution {
     public void fatigue(int k, int[][] dungeons, ArrayList<Integer> now) {
         max = Math.max(now.size(), max);
         for(int i = 0; i < dungeons.length; i++) {
-            //최소 피로도 확인
+            //최소 피로도 확인, 던전 중복 확인
             if(k >= dungeons[i][0] && !now.contains(i)) {
                 now.add(i);
                 fatigue(k - dungeons[i][1], dungeons, now);
