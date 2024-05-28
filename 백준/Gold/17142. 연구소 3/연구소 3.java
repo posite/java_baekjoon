@@ -20,9 +20,7 @@ public class Main {
             for (int j = 0; j < n; j++) {
                 int value = Integer.parseInt(st.nextToken());
                 if (value == 2) {
-                    board[i][j] = 3;
                     viruses.add(new Point(i, j));
-                    continue;
                 }
                 board[i][j] = value;
             }
@@ -45,10 +43,8 @@ public class Main {
         }
         for(int i=start; i< viruses.size(); i++) {
             Point virus = viruses.get(i);
-            board[virus.x][virus.y] = 2;
             activated.add(virus);
             activate(board, viruses, activated, i+1, count+1, max);
-            board[virus.x][virus.y] = 3;
             activated.remove(activated.size() -1);
         }
     }
@@ -86,7 +82,7 @@ public class Main {
                         return;
                     }
                 } else {
-                   if(board[i][j] == 3 || board[i][j] == 2) {
+                   if(board[i][j] == 2) {
                        continue;
                    } 
                    if(ans[i][j] > time) {
