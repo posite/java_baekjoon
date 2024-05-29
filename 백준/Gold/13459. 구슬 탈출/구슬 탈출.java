@@ -14,7 +14,7 @@ public class Main {
         char[][] board = new char[n][m];
         Point red = null;
         Point blue = null;
-        Set<State> visited = new HashSet<>();
+        boolean[][][][] visited = new boolean[n][m][n][m];
         for(int i=0; i<n; i++) {
             String token = new StringTokenizer(br.readLine()).nextToken();
             for(int j=0; j<m; j++) {
@@ -33,7 +33,7 @@ public class Main {
         }
         Queue<State> queue = new LinkedList<>();
         queue.offer(new State(red, blue, 0));
-        visited.add(queue.peek());
+        visited[red.x][red.y][blue.x][blue.y] = true;
         while(!queue.isEmpty()) {
             State current = queue.poll();
             if(current.count == 10) {
@@ -85,8 +85,8 @@ public class Main {
                 if(isRedEscape && !isBlueEscape) {
                     System.out.print("1");
                     return;
-                } else if (!isBlueEscape && !visited.contains(nextState)) {
-                    visited.add(nextState);
+                } else if (!isBlueEscape && !visited[nRed.x][nRed.y][nBlue.x][nBlue.y]) {
+                    visited[nRed.x][nRed.y][nBlue.x][nBlue.y] = true;
                     queue.add(nextState);
                 }
             }
