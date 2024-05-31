@@ -3,63 +3,54 @@ import java.util.*;
 class Solution {
     public int solution(String[][] relation) {
         List<List<Integer>> list = new ArrayList();
-        for (int i = 1; i <= relation[0].length; i++) {
-            findKey(list, new ArrayList(), relation, 0, i);
+        for(int i=1; i<=relation[0].length; i++) {
+            combination(list, new ArrayList(), relation, 0, i);
         }
-        System.out.println(list);
         return list.size();
     }
-
-    private static void findKey(List<List<Integer>> list, ArrayList<Integer> now, String[][] relation, int start, int size) {
-        if (now.size() == size) {
-            //System.out.println(now);
+    
+    public void combination(List<List<Integer>> list, ArrayList<Integer> now, String[][] relation, int start, int k) {
+        if(now.size() == k) {
             String[] keys = new String[relation.length];
-            for (int i = 0; i < relation.length; i++) {
+            for(int i=0; i<relation.length; i++) {
                 StringBuilder key = new StringBuilder();
-                for (Integer integer : now) {
-                    key.append(relation[i][integer]);
+                for(int index: now) {
+                    key.append(relation[i][index]);
                 }
                 keys[i] = key.toString();
             }
-            if (isUnique(keys)) {
+            if(isUnique(keys)) {
                 list.add(new ArrayList<>(now));
-                //System.out.println(list);
-                return;
             }
+            return;
         }
-        for (int i = start; i < relation[0].length; i++) {
-            ArrayList<Integer> al = new ArrayList<>();
-            al.add(i);
-            if (!list.contains(now)) {
-                if (!list.contains(al)) {
-                    now.add(i);
-                    boolean isExist = false;
-                    for (List<Integer> comb : list) {
-                        if (now.containsAll(comb)) {
-                            isExist = true;
-                            break;
-                        }
-                    }
-                    if (!isExist) {
-                        findKey(list, now, relation, i + 1, size);
-                    }
-                    now.remove(now.size() - 1);
+        
+        for(int i=start; i<relation[0].length; i++) {
+            now.add(i);
+            boolean isExist = false;
+            for(List<Integer> comb: list) {
+                if(now.containsAll(comb)) {
+                    isExist = true;
+                    break;
                 }
-            } else {
-                return;
             }
+            if(!isExist) {
+                combination(list, now, relation, i+1, k);
+            }
+            now.remove(now.size() - 1);
         }
     }
-
-    private static boolean isUnique(String[] keys) {
-        ArrayList<String> list = new ArrayList<>();
-        for (String key : keys) {
-            if (!list.contains(key)) {
-                list.add(key);
-            } else {
+    
+    
+    public boolean isUnique(String[] keys) {
+        ArrayList<String> list = new ArrayList();
+        for(String key: keys) {
+            if(list.contains(key)) {
                 return false;
             }
+            list.add(key);
         }
         return true;
     }
+    
 }
