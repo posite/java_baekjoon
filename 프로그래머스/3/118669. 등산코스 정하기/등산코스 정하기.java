@@ -8,7 +8,7 @@ class Solution {
         for(int i=1; i<=n; i++) {
             map.put(i, new ArrayList<>());
         }
-        Queue<Entry> pq = new PriorityQueue<>();
+        Deque<Integer> queue = new ArrayDeque<>();
         for(int i=0; i<paths.length; i++) {
             int a = paths[i][0];
             int b = paths[i][1];
@@ -19,27 +19,26 @@ class Solution {
         int[] visited;
         visited = new int[n+1];
         Arrays.fill(visited, INF); 
-        for(int i=0; i<gates.length; i++) {
-            pq.add(new Entry(gates[i], 0));
-            visited[gates[i]] = 0;
+        for(int gate: gates) {
+            queue.add(gate);
+            visited[gate] = 0;
         }
-        while(!pq.isEmpty()) {
-            Entry current = pq.remove();
-            if(current.weight > visited[current.destination]) continue;
+        while(!queue.isEmpty()) {
+            int current = queue.poll();
             boolean isSummit = false;
             for(int summit: summits) {
-                if(current.destination == summit) {
+                if(current == summit) {
                     isSummit = true;
                     break;
                 }
             }
             if(isSummit) continue;
-            for(Edge edge: map.get(current.destination)) {
+            for(Edge edge: map.get(current)) {
                 int dest = edge.destination;
-                int weight = Math.max(edge.weight, visited[current.destination]);
+                int weight = Math.max(edge.weight, visited[current]);
                 if(visited[dest] > weight) {
                     visited[dest] = weight;
-                    pq.add(new Entry(dest, weight));
+                    queue.add(dest);
                     //System.out.println(dest + " " + weight);
                 }
             }
@@ -51,7 +50,7 @@ class Solution {
             if(intensity > visited[summit]) {
                 index = summit;
                 intensity = visited[summit];
-            } else if(intensity == visited[summit]) {
+            }else if(intensity == visited[summit]) {
                 if(index > summit) {
                     index = summit;
                 }
@@ -60,19 +59,6 @@ class Solution {
         answer[0] = index;
         answer[1] = intensity;
         return answer;
-    }
-    
-    public class Entry implements Comparable<Entry> {
-        int destination, weight;
-        public Entry(int destination, int weight) {
-            this.destination = destination;
-            this.weight = weight;
-        }
-        
-        @Override
-        public int compareTo(Entry o) {
-            return this.weight - o.weight;
-        }
     }
     
     public class Edge {
