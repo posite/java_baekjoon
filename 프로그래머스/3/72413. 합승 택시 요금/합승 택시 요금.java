@@ -33,6 +33,10 @@ class Solution {
         }
         //System.out.println(Arrays.toString(fees));
         for(int i=1; i<=n; i++) {
+            if(i == s) {
+                min = Math.min(min, fees[a] + fees[b]);
+                continue;
+            }
             int[] weights = new int[n + 1];
             Arrays.fill(weights, INF);
             pq.add(new Point(i, 0));
