@@ -3,25 +3,21 @@ import java.util.*;
 class Solution {
     public int[] solution(String[] id_list, String[] report, int k) {
         int[] answer = new int[id_list.length];
-        Map<String, Set<String>> map = new HashMap<>();
-        for(String id: id_list) {
-            map.put(id, new HashSet());
-        }
-        for(String id: report) {
-            StringTokenizer st = new StringTokenizer(id);
+        Map<String, Set<String>>  map = new HashMap<>();
+        for(int i=0; i<report.length; i++) {
+            StringTokenizer st = new StringTokenizer(report[i]);
             String a = st.nextToken();
             String b = st.nextToken();
+            map.putIfAbsent(b, new HashSet());
             map.get(b).add(a);
         }
         for(String key: map.keySet()) {
-            Set<String> current = map.get(key);
-            if(current.size() >= k) {
-               for(String id: current) {
-                   answer[findIndex(id, id_list)]++;
-               }  
+            if(map.get(key).size() >= k) {
+                for(String member: map.get(key)) {
+                    answer[findIndex(member, id_list)]++;;
+                }
             }
         }
-        
         return answer;
     }
     
