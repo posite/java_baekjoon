@@ -1,28 +1,50 @@
+import java.util.*;
+
 class Solution {
     public int solution(String s) {
+        if(s.length() == 1) {
+            return 1;
+        }
         int answer = s.length();
+        Deque<String> stack = new ArrayDeque<>();
         for(int i=1; i<=s.length()/2; i++) {
-            StringBuilder base = new StringBuilder();
-            String prev = s.substring(0, i);
-            int repeatCount = 1;
-            for(int j=i; j<=s.length(); j+=i) {
+            int currentLength = 0;
+            int currentIndex = 0;
+            
+            while(s.length() > currentIndex) {
                 String current;
-                if(j+i > s.length()) current = s.substring(j);
-                else current = s.substring(j, j+i);
-                if(current.equals(prev)) {
-                    repeatCount++;
+                if(currentIndex + i > s.length()) current = s.substring(currentIndex);
+                else current = s.substring(currentIndex, currentIndex + i);
+                currentIndex += i;
+                if(stack.isEmpty()) {
+                    stack.push(current);
                     continue;
                 }
-                if(repeatCount > 1) base.append(repeatCount + prev);
-                else base.append(prev);
-                repeatCount = 1;
-                prev = current;
+                if(current.equals(stack.peek())) {
+                    stack.push(current);
+                    continue;
+                }
+                int count = stack.size();
+                stack.clear();
+                stack.push(current);
+                if (count > 1) {
+                    currentLength += (Integer.toString(count).length() + i);
+                    continue;
+                }
+                currentLength += i;
             }
-            if(repeatCount > 1) base.append(repeatCount + prev);
-            else base.append(prev);
-            answer = Math.min(answer, base.length());
+            if(!stack.isEmpty()) {
+                String last = stack.peek();
+                int count = stack.size();
+                if (count > 1) {
+                    currentLength += (Integer.toString(count).length() + last.length());
+                } else {
+                    currentLength += last.length();
+                }
+                stack.clear();
+            }
+            answer = Math.min(answer, currentLength);
         }
-        
         return answer;
     }
 }
