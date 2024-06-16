@@ -2,49 +2,53 @@ import java.util.*;
 
 class Solution {
     public int solution(String s) {
-        if(s.length() == 1) {
-            return 1;
-        }
-        int answer = s.length();
-        Deque<String> stack = new ArrayDeque<>();
+        List<Integer> anwers = new ArrayList();
+        Map<String, Integer> map = new HashMap<>();
+        int min = s.length();
         for(int i=1; i<=s.length()/2; i++) {
-            int currentLength = 0;
+            StringBuilder sb = new StringBuilder();
             int currentIndex = 0;
-            
             while(s.length() > currentIndex) {
                 String current;
                 if(currentIndex + i > s.length()) current = s.substring(currentIndex);
                 else current = s.substring(currentIndex, currentIndex + i);
                 currentIndex += i;
-                if(stack.isEmpty()) {
-                    stack.push(current);
+                
+                if(map.isEmpty()) {
+                    map.put(current, 1);
                     continue;
                 }
-                if(current.equals(stack.peek())) {
-                    stack.push(current);
+                if(map.containsKey(current)) {
+                    map.put(current, map.get(current) + 1);
                     continue;
                 }
-                int count = stack.size();
-                stack.clear();
-                stack.push(current);
-                if (count > 1) {
-                    currentLength += (Integer.toString(count).length() + i);
-                    continue;
-                }
-                currentLength += i;
-            }
-            if(!stack.isEmpty()) {
-                String last = stack.peek();
-                int count = stack.size();
-                if (count > 1) {
-                    currentLength += (Integer.toString(count).length() + last.length());
+                map.put(current, 1);
+                String prev = s.substring(currentIndex - 2*i, currentIndex -i);
+                int prevCount = map.remove(prev);
+                if(prevCount >1 ) {
+                    sb.append(prevCount + prev);
                 } else {
-                    currentLength += last.length();
+                    sb.append(prev);
                 }
-                stack.clear();
             }
-            answer = Math.min(answer, currentLength);
+            int remain = 0;
+            if (i == 1) {
+                remain = 1;
+            } else if (s.length() % i != 0) {
+                remain = s.length() % i;
+            } else {
+                remain = i;
+            }
+	        String lastString = s.substring(s.length() - remain);
+            int count = map.remove(lastString);
+            if(count > 1) {
+                sb.append(count + lastString);
+            } else {
+                sb.append(lastString);
+            }
+            min = Math.min(min, sb.length());
         }
-        return answer;
+        
+        return min;
     }
 }
