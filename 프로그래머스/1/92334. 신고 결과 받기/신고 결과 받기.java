@@ -3,27 +3,29 @@ import java.util.*;
 class Solution {
     public int[] solution(String[] id_list, String[] report, int k) {
         int[] answer = new int[id_list.length];
-        Map<String, Set<String>>  map = new HashMap<>();
-        for(int i=0; i<report.length; i++) {
-            StringTokenizer st = new StringTokenizer(report[i]);
-            String a = st.nextToken();
-            String b = st.nextToken();
-            map.putIfAbsent(b, new HashSet());
-            map.get(b).add(a);
+        StringTokenizer st;
+        Map<String, Set<String>> map = new HashMap<>();
+        for(String rep: report) {
+            st = new StringTokenizer(rep);
+            String reporter = st.nextToken();
+            String defendant = st.nextToken();
+            map.putIfAbsent(defendant, new HashSet());
+            map.get(defendant).add(reporter);
         }
-        for(String key: map.keySet()) {
-            if(map.get(key).size() >= k) {
-                for(String member: map.get(key)) {
-                    answer[findIndex(member, id_list)]++;;
+        for(Map.Entry<String, Set<String>> entry: map.entrySet()) {
+            if(entry.getValue().size() >= k) {
+                for(String name: entry.getValue()) {
+                    answer[findIndex(name, id_list)]++;
                 }
             }
         }
+        
         return answer;
     }
     
-    public int findIndex(String s, String[] id_list) {
+    public int findIndex(String name, String[] id_list) {
         for(int i=0; i<id_list.length; i++) {
-            if(s.equals(id_list[i])) return i;
+            if(name.equals(id_list[i])) return i;
         }
         return -1;
     }
