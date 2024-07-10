@@ -1,35 +1,28 @@
 import java.util.*;
 
 class Solution {
+    int max = 0;
     public int solution(int k, int[][] dungeons) {
         boolean[] visited = new boolean[dungeons.length];
-        List<List<Integer>> list = new ArrayList();
-        backtraking(list, new ArrayList(), dungeons, k, visited);
-        int max = 0;
-        for(List<Integer> explore: list) {
-            if(explore.size() > max) {
-                max = explore.size();
-            }
-        }
+        exploreDungeon(new ArrayList<>(), dungeons, k, visited);
         return max;
     }
     
-    public void backtraking(List<List<Integer>> list, ArrayList<Integer> now, int[][] dungeons, int fatigue, boolean[] visited) {
-        //System.out.println(now);
-        list.add(new ArrayList<>(now));
-        if(now.size() == dungeons.length) {
-            return;
-        }
+    public void exploreDungeon(List<Integer> now, int[][] dungeons, int health, boolean[] visited) {
+        max = Math.max(max, now.size());
         for(int i=0; i<dungeons.length; i++) {
-            int[] dungeon = dungeons[i];
-            if(fatigue >= dungeon[0] && !visited[i]) {
-                visited[i] = true;
-                now.add(i);
-                backtraking(list, now, dungeons, (fatigue - dungeon[1]), visited);
-                visited[i] = false;
-                now.remove(now.size() -1);
+            if(visited[i]) {
+                continue;
             }
+            if(dungeons[i][0] > health) {
+                continue;
+            }
+            now.add(i);
+            visited[i] = true;
+            exploreDungeon(now, dungeons, health - dungeons[i][1], visited);
+            now.remove(now.size()-1);
+            visited[i] = false;
         }
-        
     }
+        
 }
