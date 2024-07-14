@@ -3,23 +3,24 @@ import java.util.*;
 class Solution {
     public int solution(String[][] relation) {
         List<List<Integer>> list = new ArrayList();
-        for(int i=1; i<=relation[0].length; i++) {
-            combination(list, new ArrayList(), relation, 0, i);
+        for(int i=1; i<= relation[0].length; i++) {
+            findCandidate(list, new ArrayList<>(), relation, 0, i);
         }
+        //System.out.println(list);
         return list.size();
     }
     
-    public void combination(List<List<Integer>> list, ArrayList<Integer> now, String[][] relation, int start, int k) {
-        if(now.size() == k) {
-            String[] keys = new String[relation.length];
+    public void findCandidate(List<List<Integer>> list, List<Integer> now, String[][] relation, int start, int size) {
+        if(now.size() == size) {
+            List<String> key = new ArrayList<>();
             for(int i=0; i<relation.length; i++) {
-                StringBuilder key = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
                 for(int index: now) {
-                    key.append(relation[i][index]);
+                    sb.append(relation[i][index]);
                 }
-                keys[i] = key.toString();
+                key.add(sb.toString());
             }
-            if(isUnique(keys)) {
+            if(isUnique(key)) {
                 list.add(new ArrayList<>(now));
             }
             return;
@@ -27,30 +28,23 @@ class Solution {
         
         for(int i=start; i<relation[0].length; i++) {
             now.add(i);
-            boolean isExist = false;
-            for(List<Integer> comb: list) {
-                if(now.containsAll(comb)) {
-                    isExist = true;
+            boolean isMinimum = true;
+            for(List<Integer> candidateKey: list) {
+                if(now.containsAll(candidateKey)) {
+                    isMinimum = false;
                     break;
                 }
             }
-            if(!isExist) {
-                combination(list, now, relation, i+1, k);
+            if(isMinimum) {
+                findCandidate(list, now, relation, i, size);
             }
-            now.remove(now.size() - 1);
+            now.remove(now.size() -1);
         }
     }
     
-    
-    public boolean isUnique(String[] keys) {
-        ArrayList<String> list = new ArrayList();
-        for(String key: keys) {
-            if(list.contains(key)) {
-                return false;
-            }
-            list.add(key);
-        }
-        return true;
+    public boolean isUnique(List<String> key) {
+        Set<String> set = new HashSet<>(key);
+        return set.size() == key.size();
+        
     }
-    
 }
