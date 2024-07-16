@@ -1,34 +1,38 @@
+import java.util.*;
+
 class Solution {
     public int solution(int[] queue1, int[] queue2) {
-        int[] board = new int[queue1.length + queue2.length];
-        System.arraycopy(queue1, 0, board, 0, queue1.length);
-        System.arraycopy(queue2, 0, board, queue1.length, queue2.length);
-        long sum1 = 0;
-        long sum2 = 0;
-        for(int num: queue1) {
-            sum1 += num;
+        int[] totalQueue = new int[queue1.length + queue2.length];
+        System.arraycopy(queue1, 0, totalQueue, 0, queue1.length);
+        System.arraycopy(queue2, 0, totalQueue, queue1.length, queue2.length);
+        //System.out.println(Arrays.toString(totalQueue));
+        long sumQ1 = 0;
+        long sumQ2 = 0;
+        for(int i=0; i<queue1.length; i++) {
+            sumQ1 += queue1[i];
         }
-        for(int num: queue2) {
-            sum2 += num;
+        for(int i=0; i<queue2.length; i++) {
+            sumQ2 += queue2[i];
         }
-        long target = (sum1 + sum2) / 2;
-        int start = 0, end = queue1.length;
-        for(int i=0; i< 3* queue1.length * 3; i++) {
-            if(start == end || end == board.length) {
-                return -1;
+        int left = 0, right = queue1.length;
+        long target = (sumQ1 + sumQ2)/2;
+        //System.out.println(sumQ1 + " " + target);
+        
+        for(int i=0; i<queue1.length*3; i++) {
+            if(left == right || right == totalQueue.length) return -1;
+            
+            
+            if(sumQ1 == target) return i;
+            if(sumQ1 > target) {
+                sumQ1 -= totalQueue[left];
+                left++;
+            } else {
+                sumQ1 += totalQueue[right];
+                right++;
             }
-            if(sum1 > target) {
-                sum1 -= board[start];
-                start++;
-                continue;
-            }
-            if(target > sum1) {
-                sum1 += board[end];
-                end++;
-                continue;
-            }
-            return i;
         }
+        
+        
         return -1;
     }
 }
