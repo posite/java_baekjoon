@@ -1,105 +1,102 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
+import java.io.*;
 
 public class Main {
     private static int[] dx = {-1, 1, 0, 0};
     private static int[] dy = {0, 0, -1, 1};
-    private static int min = Integer.MAX_VALUE;
+    static int min = Integer.MAX_VALUE;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int n = Integer.parseInt(st.nextToken());
-        int m = Integer.parseInt(st.nextToken());
-        ArrayList<Point> viruses = new ArrayList<>();
-        int[][] board = new int[n][n];
-        for (int i = 0; i < n; i++) {
-            st = new StringTokenizer(br.readLine());
-            for (int j = 0; j < n; j++) {
-                int value = Integer.parseInt(st.nextToken());
-                if (value == 2) {
-                    viruses.add(new Point(i, j));
-                }
-                board[i][j] = value;
-            }
-        }
-        activate(board, viruses, new ArrayList<Point>(), 0, 0, m);
-        if(min == Integer.MAX_VALUE) {
-            System.out.println(-1);
-        } else {
-            System.out.println(min);
-        }
-    }
-    
-    private static void activate(int[][] board, ArrayList<Point> viruses, ArrayList<Point> activated, int start, int count, int max) {
-        if(max == count) {
-            int[][] boardCopy = new int[board.length][board.length];
-            for(int i=0; i<board.length; i++) {
-                boardCopy[i] = board[i].clone();
-            }
-            bfs(boardCopy, activated);
-        }
-        for(int i=start; i< viruses.size(); i++) {
-            Point virus = viruses.get(i);
-            activated.add(virus);
-            activate(board, viruses, activated, i+1, count+1, max);
-            activated.remove(activated.size() -1);
-        }
-    }
-    
-    private static void bfs(int[][] board, ArrayList<Point> activated) {
-        int length = board.length;
-        int[][] ans = new int[length][length];
-        for (int[] an : ans) {
-            Arrays.fill(an, Integer.MAX_VALUE);
-        }
-        Queue<Point> queue = new LinkedList<>();
-        for(Point virus: activated) {
-            ans[virus.x][virus.y] = 0;
-            queue.offer(virus);
-        }
-        while(!queue.isEmpty()) {
-            Point current = queue.poll();
-            for(int i=0; i<dx.length; i++) {
-                int nx = current.x + dx[i];
-                int ny = current.y + dy[i];
-                if(nx>=0 && nx<length && ny >=0 && ny < length) {
-                    if(board[nx][ny] == 1) continue;
-                    if(ans[nx][ny] > ans[current.x][current.y] + 1) {
-                        ans[nx][ny] = ans[current.x][current.y] + 1;
-                        queue.offer(new Point(nx, ny));
+        int[][] board;
+        try {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int size = Integer.parseInt(st.nextToken());
+            int virusCount = Integer.parseInt(st.nextToken());
+            board = new int[size][size];
+            List<Point> viruses = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                st = new StringTokenizer(br.readLine());
+                for (int j = 0; j < size; j++) {
+                    board[i][j] = Integer.parseInt(st.nextToken());
+                    if (board[i][j] == 2) {
+                        viruses.add(new Point(i, j));
+                        board[i][j] = 3;
                     }
-                } 
-            }
-        }
-        int time = 0;
-        for(int i=0; i<length; i++) {
-            for(int j=0; j<length; j++) {
-                if(ans[i][j] == Integer.MAX_VALUE) {
-                    if(board[i][j] == 0) {
-                        return;
-                    }
-                } else {
-                   if(board[i][j] == 2) {
-                       continue;
-                   } 
-                   if(ans[i][j] > time) {
-                       time = ans[i][j];
-                   }
                 }
             }
+            selectVirus(board, viruses, new ArrayList<>(), virusCount, 0);
+            if (min == Integer.MAX_VALUE) {
+                System.out.println("-1");
+            } else {
+                System.out.println(min);
+            }
+        } catch (IOException e) {
+
         }
-        if (min == -1) {
-            min = time;
+    }
+
+    public static void selectVirus(int[][] board, List<Point> viruses, List<Point> now, int virusCount, int start) {
+        if (now.size() == virusCount) {
+            int[][] copy = new int[board.length][board[0].length];
+            for (int i = 0; i < copy.length; i++) {
+                System.arraycopy(board[i], 0, copy[i], 0, copy[0].length);
+            }
+            activateVirus(copy, now);
             return;
         }
-        if(min > time) {
-            min = time;
+
+        for (int i = start; i < viruses.size(); i++) {
+            now.add(viruses.get(i));
+            selectVirus(board, viruses, now, virusCount, i + 1);
+            now.remove(now.size() - 1);
         }
     }
-    static class Point {
+
+    public static void activateVirus(int[][] board, List<Point> now) {
+        int time = 0;
+        int length = board.length;
+        Deque<Point> queue = new ArrayDeque<>();
+        int[][] results = new int[length][length];
+        for (Point virus : now) {
+            board[virus.x][virus.y] = 2;
+            queue.add(virus);
+        }
+
+        while (!queue.isEmpty()) {
+            Point current = queue.poll();
+            for (int i = 0; i < 4; i++) {
+                int nx = current.x + dx[i];
+                int ny = current.y + dy[i];
+                if (nx >= 0 && nx < length && ny >= 0 && ny < length) {
+                    if (board[nx][ny] == 1 || board[nx][ny] == 2) continue;
+                    if (results[nx][ny] > results[current.x][current.y] + 1 || results[nx][ny] == 0) {
+                        results[nx][ny] = results[current.x][current.y] + 1;
+                        queue.offer(new Point(nx, ny));
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < length; i++) {
+            for (int j = 0; j < length; j++) {
+                if (board[i][j] == 0) {
+                    if (results[i][j] == 0) {
+                        return;
+                    }
+                }
+                if (board[i][j] == 3) continue;
+                time = Math.max(time, results[i][j]);
+            }
+        }
+        /*for (int i = 0; i < length; i++) {
+            System.out.println(Arrays.toString(results[i]));
+        }
+        System.out.println();*/
+        min = Math.min(time, min);
+    }
+
+    public static class Point {
         int x, y;
 
         public Point(int x, int y) {
