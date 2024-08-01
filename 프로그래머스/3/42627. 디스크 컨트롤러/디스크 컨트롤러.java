@@ -4,47 +4,42 @@ class Solution {
     public int solution(int[][] jobs) {
         int time = 0;
         int finishTime = 0;
-        
-        List<Job> remain = new ArrayList<>();
+        int jobCount = jobs.length;
+        List<Job> remains = new ArrayList<>();
         Queue<Job> pq = new PriorityQueue<>();
-        for(int i=0; i<jobs.length; i++) {
-            pq.offer(new Job(jobs[i][0], jobs[i][1]));
+        for(int i=0; i<jobCount; i++) {
+            pq.add(new Job(jobs[i][0], jobs[i][1]));
         }
         
         while(!pq.isEmpty()) {
-            Job next = pq.peek();
-            if(next.inputTime <= time) {
-                next = pq.remove();
-                time += next.duration;
-                finishTime += (time - next.inputTime);
-                pq.addAll(remain);
-                remain.clear();
+            Job current = pq.peek();
+            if(time >= current.inputTime) {
+                current = pq.remove();
+                time += current.duration;
+                finishTime += (time - current.inputTime);
+                pq.addAll(remains);
+                remains.clear();
                 continue;
             }
-            
             int count = 0;
             int min = Integer.MAX_VALUE;
             for(Job job: pq) {
                 if(job.inputTime > time) {
-                    if(min > job.inputTime) {
-                        min = job.inputTime;
-                    }
                     count++;
+                    min = Math.min(min, job.inputTime);
                 }
             }
             if(count == pq.size()) {
                 time = min;
                 continue;
             }
-            
-            remain.add(pq.remove());
-            
+            remains.add(pq.remove());
         }
         
-        return finishTime/jobs.length;
+        return finishTime/jobCount;
     }
     
-    public static class Job implements Comparable<Job> {
+    public class Job implements Comparable<Job> {
         int inputTime, duration;
         
         public Job(int inputTime, int duration) {
