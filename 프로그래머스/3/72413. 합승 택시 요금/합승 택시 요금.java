@@ -2,83 +2,86 @@ import java.util.*;
 
 class Solution {
     public int solution(int n, int s, int a, int b, int[][] fares) {
-        int answer = Integer.MAX_VALUE;
-        int[][] graph = new int[n+1][n+1];
-        for(int[] fare: fares) {
-            graph[fare[0]][fare[1]] = fare[2];
-            graph[fare[1]][fare[0]] = fare[2];
-        }
+        int[] startFees = new int[n+1];
+        int[] aFees = new int[n+1];
+        int[] bFees = new int[n+1];
         
-        int[] startDistance = new int[n+1];
-        int[] aDistance = new int[n+1];
-        int[] bDistance = new int[n+1];
+        
+        Map<Integer, List<Point>> map = new HashMap<>();
+        for(int i=1; i<=n; i++) {
+            map.put(i, new ArrayList<>());
+        }
+        for(int i=0; i<fares.length; i++) {
+            map.get(fares[i][0]).add(new Point(fares[i][1], fares[i][2]));
+            map.get(fares[i][1]).add(new Point(fares[i][0], fares[i][2]));
+        }
         
         Queue<Point> pq = new PriorityQueue<>();
         pq.add(new Point(s, 0));
         while(!pq.isEmpty()) {
-            Point current = pq.poll();
-            if(current.distance > startDistance[current.node]) continue;
-            for(int i=0; i<=n; i++) {
-                if(i == s) continue;
-                if(graph[current.node][i] == 0) continue;
-                int nextDistance = graph[current.node][i] + current.distance;
-                if(startDistance[i] == 0 || startDistance[i] > nextDistance) {
-                    pq.add(new Point(i, nextDistance));
-                    startDistance[i] = nextDistance;
+            Point current = pq.remove();
+            if(current.fee > startFees[current.node]) continue;
+            for(Point next: map.get(current.node)) {
+                if(next.node == s) continue;
+                int nextFee = startFees[current.node] + next.fee;
+                if(startFees[next.node] == 0 || startFees[next.node] > nextFee) {
+                    startFees[next.node] = nextFee;
+                    pq.add(new Point(next.node, nextFee));
                 }
             }
         }
         
+
         pq.add(new Point(a, 0));
         while(!pq.isEmpty()) {
-            Point current = pq.poll();
-            if(current.distance > aDistance[current.node]) continue;
-            for(int i=0; i<=n; i++) {
-                if(i == a) continue;
-                if(graph[current.node][i] == 0) continue;
-                int nextDistance = graph[current.node][i] + current.distance;
-                if(aDistance[i] == 0 || aDistance[i] > nextDistance) {
-                    pq.add(new Point(i, nextDistance));
-                    aDistance[i] = nextDistance;
+            Point current = pq.remove();
+            if(current.fee > aFees[current.node]) continue;
+            for(Point next: map.get(current.node)) {
+                if(next.node == a) continue;
+                int nextFee = aFees[current.node] + next.fee;
+                if(aFees[next.node] == 0 || aFees[next.node] > nextFee) {
+                    aFees[next.node] = nextFee;
+                    pq.add(new Point(next.node, nextFee));
                 }
             }
         }
         
         pq.add(new Point(b, 0));
         while(!pq.isEmpty()) {
-            Point current = pq.poll();
-            if(current.distance > bDistance[current.node]) continue;
-            for(int i=0; i<=n; i++) {
-                if(i == b) continue;
-                if(graph[current.node][i] == 0) continue;
-                int nextDistance = graph[current.node][i] + current.distance;
-                if(bDistance[i] == 0 || bDistance[i] > nextDistance) {
-                    pq.add(new Point(i, nextDistance));
-                    bDistance[i] = nextDistance;
+            Point current = pq.remove();
+            if(current.fee > bFees[current.node]) continue;
+            for(Point next: map.get(current.node)) {
+                if(next.node == b) continue;
+                int nextFee = bFees[current.node] + next.fee;
+                if(bFees[next.node] == 0 || bFees[next.node] > nextFee) {
+                    bFees[next.node] = nextFee;
+                    pq.add(new Point(next.node, nextFee));
                 }
             }
         }
         
-        
         int min = Integer.MAX_VALUE;
         for(int i=1; i<=n; i++) {
-            if(startDistance[i] == 0 && aDistance[i] == 0 && bDistance[i] == 0) continue;
-            min = Math.min(min, (startDistance[i] + aDistance[i] + bDistance[i]));
+            if(startFees[i] == 0 && aFees[i] == 0 && bFees[i] == 0) {
+                continue;
+            }
+            min = Math.min(min, (startFees[i] + aFees[i] + bFees[i]));
         }
+        
         return min;
     }
     
     public class Point implements Comparable<Point> {
-        int node, distance;
+        int node, fee;
         
-        public Point(int node, int distance) {
+        public Point(int node, int fee) {
             this.node = node;
-            this.distance = distance;
+            this.fee = fee;
         }
         
         @Override
         public int compareTo(Point o) {
-            return this.distance - o.distance;
+            return this.fee - o.fee;
         }
     }
 }
