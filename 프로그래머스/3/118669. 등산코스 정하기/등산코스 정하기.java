@@ -2,75 +2,70 @@ import java.util.*;
 
 class Solution {
     public int[] solution(int n, int[][] paths, int[] gates, int[] summits) {
-        final int INF = Integer.MAX_VALUE;
-        int[] distances = new int[n+1];
-        Arrays.fill(distances, INF);
-        Map<Integer, List<Edge>> map = new HashMap<>();
+        int[] answer = new int[2];
+        Map<Integer, List<Point>> map = new HashMap<>();
         for(int i=1; i<=n; i++) {
             map.put(i, new ArrayList<>());
         }
+        
         for(int i=0; i<paths.length; i++) {
-            map.get(paths[i][0]).add(new Edge(paths[i][1], paths[i][2]));
-            map.get(paths[i][1]).add(new Edge(paths[i][0], paths[i][2]));
+            map.get(paths[i][0]).add(new Point(paths[i][1], paths[i][2]));
+            map.get(paths[i][1]).add(new Point(paths[i][0], paths[i][2]));
         }
-        Queue<Entry> pq = new PriorityQueue<>();
-        for(int start: gates) {
-            distances[start] = 0;
-            pq.add(new Entry(start, 0));
+        
+        int[] intensities = new int[n+1];
+        Arrays.fill(intensities, Integer.MAX_VALUE);
+        Queue<Point> pq = new PriorityQueue<>();
+        for(int gate: gates) {
+            pq.add(new Point(gate, 0));
+            intensities[gate] = 0;
         }
-        while(!pq.isEmpty()) {
-            Entry current = pq.remove();
-            boolean isSummit = false;
+    
+        outer: while(!pq.isEmpty()) {
+            Point current = pq.remove();
+            if(current.weight > intensities[current.node]) continue;
             for(int summit: summits) {
-                if(summit == current.node) {
-                    isSummit = true;
-                    break;
-                }
+                if(current.node == summit) continue outer;
             }
-            if(isSummit) continue;
-            if(current.distance > distances[current.node]) continue;
-            for(Edge edge: map.get(current.node)) {
-                int edgeMax = Math.max(current.distance, edge.weight);
-                if(distances[edge.destination] > edgeMax) {
-                    distances[edge.destination] = edgeMax;
-                    pq.add(new Entry(edge.destination, edgeMax));
+            
+            for(Point next: map.get(current.node)) {
+                int nextIntensity = Math.max(current.weight, next.weight);
+                if(intensities[next.node] > nextIntensity) {
+                    pq.add(new Point(next.node, nextIntensity));
+                    intensities[next.node] = nextIntensity;
                 }
             }
         }
-        int min = INF;
-        int index = 0;
-        for(int summit: summits) {
-            if(min > distances[summit]) {
-                min = distances[summit];
+        int index = -1;
+        int min = Integer.MAX_VALUE;
+        
+        for(int summit: summits){
+            if(min > intensities[summit]) {
                 index = summit;
-            } else if(min == distances[summit]) {
+                min = intensities[summit];
+            } else if(min == intensities[summit]) {
                 if(index > summit) {
                     index = summit;
                 }
             }
-        }
+        } 
+        answer[0] = index;
+        answer[1] = min;
         
-        return new int[]{index, min};
+        return answer;
     }
     
-    public class Entry implements Comparable<Entry> {
-        int node, distance;
-        public Entry(int node, int distance)  {
+    public class Point implements Comparable<Point> {
+        int node, weight;
+        
+        public Point(int node, int weight) {
             this.node = node;
-            this.distance = distance;
+            this.weight = weight;
         }
         
         @Override
-        public int compareTo(Entry o) {
-            return this.distance - o.distance;
-        }
-    }
-    
-    public class Edge {
-        int destination, weight;
-        public Edge(int destination, int weight)  {
-            this.destination = destination;
-            this.weight = weight;
+        public int compareTo(Point o) {
+            return this.weight - o.weight;
         }
     }
 }
