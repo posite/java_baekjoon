@@ -2,53 +2,60 @@ import java.util.*;
 
 class Solution {
     public int solution(String s) {
-        List<Integer> anwers = new ArrayList();
+        int length = s.length();
+        if(length == 1) return 1;
+        int minLength = Integer.MAX_VALUE;
         Map<String, Integer> map = new HashMap<>();
-        int min = s.length();
-        for(int i=1; i<=s.length()/2; i++) {
-            StringBuilder sb = new StringBuilder();
+        for(int i=1; i<=length/2; i++) {
             int currentIndex = 0;
-            while(s.length() > currentIndex) {
-                String current;
-                if(currentIndex + i > s.length()) current = s.substring(currentIndex);
-                else current = s.substring(currentIndex, currentIndex + i);
-                currentIndex += i;
-                
-                if(map.isEmpty()) {
-                    map.put(current, 1);
-                    continue;
-                }
-                if(map.containsKey(current)) {
-                    map.put(current, map.get(current) + 1);
-                    continue;
-                }
-                map.put(current, 1);
-                String prev = s.substring(currentIndex - 2*i, currentIndex -i);
-                int prevCount = map.remove(prev);
-                if(prevCount >1 ) {
-                    sb.append(prevCount + prev);
+            int currentLength = 0;
+            while(length > currentIndex) {
+                String currentString = "";
+                if(currentIndex + i > length) {
+                    currentString = s.substring(currentIndex);
                 } else {
-                    sb.append(prev);
+                    currentString = s.substring(currentIndex, currentIndex + i);
+                }
+                
+                currentIndex += i;
+                if(map.isEmpty()) {
+                    map.put(currentString, 1);
+                    continue;
+                }
+                
+                if(map.containsKey(currentString)) {
+                    map.put(currentString, map.get(currentString) + 1);
+                    continue;
+                }
+                
+                String beforeString = s.substring(currentIndex - 2*i, currentIndex - i);
+                int beforeCount = map.remove(beforeString);
+                map.put(currentString, 1);
+                if(beforeCount > 1) {
+                    currentLength += (Integer.toString(beforeCount).length() + i);
+                } else {
+                    currentLength += i;
                 }
             }
-            int remain = 0;
-            if (i == 1) {
-                remain = 1;
-            } else if (s.length() % i != 0) {
-                remain = s.length() % i;
-            } else {
-                remain = i;
+            if(!map.isEmpty()) {
+                int remain = 0;
+                if(i==1) {
+                    remain = length - 1;
+                } else if(length % i == 0) {
+                    remain = length - i;
+                } else {
+                    remain = length - length%i;
+                }
+                String last = s.substring(remain);
+                int lastCount = map.remove(last);
+                if(lastCount > 1) {
+                    currentLength += (Integer.toString(lastCount).length() + i);
+                } else {
+                    currentLength += last.length();
+                }
             }
-	        String lastString = s.substring(s.length() - remain);
-            int count = map.remove(lastString);
-            if(count > 1) {
-                sb.append(count + lastString);
-            } else {
-                sb.append(lastString);
-            }
-            min = Math.min(min, sb.length());
+            minLength = Math.min(minLength, currentLength);
         }
-        
-        return min;
+        return minLength;
     }
 }
