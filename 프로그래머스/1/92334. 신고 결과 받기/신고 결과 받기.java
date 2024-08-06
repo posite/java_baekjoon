@@ -5,8 +5,10 @@ class Solution {
         int[] answer = new int[id_list.length];
            
         Map<String, Set<String>> map = new HashMap<>();
-        for(String id: id_list) {
-            map.put(id, new HashSet<>());
+        Map<String, Integer> indexes = new HashMap<>();
+        for(int i=0; i<id_list.length; i++) {
+            indexes.put(id_list[i], i);
+            map.put(id_list[i], new HashSet<>());
         }
         for(String rep: report) {
             StringTokenizer st = new StringTokenizer(rep);
@@ -19,7 +21,7 @@ class Solution {
             Set<String> value = entry.getValue();
             if(value.size() >= k) {
                 for(String user: value) {
-                    answer[findUser(id_list, user)]++;
+                    answer[indexes.get(user)]++;
                 }
             }
         }
