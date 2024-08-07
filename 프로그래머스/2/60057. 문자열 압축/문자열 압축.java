@@ -2,60 +2,47 @@ import java.util.*;
 
 class Solution {
     public int solution(String s) {
+        if(s.length() < 2) {
+            return s.length();
+        }
+        int answer = Integer.MAX_VALUE;
         int length = s.length();
-        if(length == 1) return 1;
-        int minLength = Integer.MAX_VALUE;
-        Map<String, Integer> map = new HashMap<>();
+        
+        Deque<String> stack = new ArrayDeque<>();
+        
         for(int i=1; i<=length/2; i++) {
-            int currentIndex = 0;
             int currentLength = 0;
+            int currentIndex = 0;
+            
             while(length > currentIndex) {
                 String currentString = "";
-                if(currentIndex + i > length) {
-                    currentString = s.substring(currentIndex);
-                } else {
-                    currentString = s.substring(currentIndex, currentIndex + i);
-                }
-                
+                if(currentIndex + i > length) currentString = s.substring(currentIndex);
+                else currentString = s.substring(currentIndex, currentIndex + i);
                 currentIndex += i;
-                if(map.isEmpty()) {
-                    map.put(currentString, 1);
+                
+                if(stack.isEmpty() || stack.peek().equals(currentString)) {
+                    stack.push(currentString);
                     continue;
                 }
                 
-                if(map.containsKey(currentString)) {
-                    map.put(currentString, map.get(currentString) + 1);
-                    continue;
-                }
+                String beforeString = stack.peek();
+                int beforeCount = stack.size();
+                stack.clear();
+                if(beforeCount > 1) currentLength += (Integer.toString(beforeCount).length() + i); 
+                else currentLength += i;
                 
-                String beforeString = s.substring(currentIndex - 2*i, currentIndex - i);
-                int beforeCount = map.remove(beforeString);
-                map.put(currentString, 1);
-                if(beforeCount > 1) {
-                    currentLength += (Integer.toString(beforeCount).length() + i);
-                } else {
-                    currentLength += i;
-                }
+                stack.push(currentString);
             }
-            if(!map.isEmpty()) {
-                int remain = 0;
-                if(i==1) {
-                    remain = length - 1;
-                } else if(length % i == 0) {
-                    remain = length - i;
-                } else {
-                    remain = length - length%i;
-                }
-                String last = s.substring(remain);
-                int lastCount = map.remove(last);
-                if(lastCount > 1) {
-                    currentLength += (Integer.toString(lastCount).length() + i);
-                } else {
-                    currentLength += last.length();
-                }
+            
+            if(!stack.isEmpty()) {
+                String lastString = stack.peek();
+                int lastCount = stack.size();
+                if(lastCount > 1) currentLength += (Integer.toString(lastCount).length() + lastString.length()); 
+                else currentLength += lastString.length();
             }
-            minLength = Math.min(minLength, currentLength);
+            answer = Math.min(currentLength, answer);
+            stack.clear();
         }
-        return minLength;
+        return answer;
     }
 }
