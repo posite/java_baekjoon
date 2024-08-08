@@ -1,106 +1,108 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     private static int[] dx = {-1, 1, 0, 0};
     private static int[] dy = {0, 0, -1, 1};
     private static int max = 0;
+
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
-        int n = Integer.parseInt(st.nextToken());
-        int m = Integer.parseInt(st.nextToken());
-        ArrayList<Point> viruses = new ArrayList();
-        int[][] board = new int[n][m];
-        for(int i=0; i<n; i++) {
+        int x = Integer.parseInt(st.nextToken());
+        int y = Integer.parseInt(st.nextToken());
+        int[][] board = new int[x][y];
+        List<Point> viruses = new ArrayList<>();
+        for (int i = 0; i < x; i++) {
             st = new StringTokenizer(br.readLine());
-            for(int j=0; j<m; j++) {
-                int current = Integer.parseInt(st.nextToken());
-                board[i][j] = current;
-                if(current == 2) {
+            for (int j = 0; j < y; j++) {
+                board[i][j] = Integer.parseInt(st.nextToken());
+                if (board[i][j] == 2) {
                     viruses.add(new Point(i, j));
                 }
             }
         }
-        block(board, 0, 0, 0, viruses);
-        
+        //System.out.println(viruses);
+        selectWall(board, viruses, new ArrayList<>(), 0, 0);
         System.out.println(max);
     }
-    
-    private static void block(int[][] board, int x, int y, int count, ArrayList<Point> viruses) {
-        if(count == 3) {
-            int[][] boardCopy = new int[board.length][board[0].length];
-            for(int i=0; i<board.length; i++) {
-                boardCopy[i] = board[i].clone();
+
+    public static void selectWall(int[][] board, List<Point> viruses, List<Point> walls, int x, int y) {
+        if (walls.size() == 3) {
+            //System.out.println(walls);
+            int[][] copy = new int[board.length][board[0].length];
+            for (int i = 0; i < board.length; i++) {
+                System.arraycopy(board[i], 0, copy[i], 0, board[i].length);
             }
-            bfs(boardCopy, viruses);
+            bfs(copy, viruses);
             return;
         }
-        for(int i=x; i<board.length; i++) {
-            if(i==x) {
-                for(int j=y; j<board[0].length; j++) {
-                    if(board[i][j] == 0) {
+        for (int i = x; i < board.length; i++) {
+            if (i == x) {
+                for (int j = y; j < board[0].length; j++) {
+                    if (board[i][j] == 0) {
+                        walls.add(new Point(i, j));
                         board[i][j] = 1;
-                        block(board, i, j, count+1, viruses);
+                        selectWall(board, viruses, walls, i, j);
                         board[i][j] = 0;
+                        walls.remove(walls.size() - 1);
                     }
                 }
             } else {
-                for(int j=0; j<board[0].length; j++) {
-                    if(board[i][j] == 0) {
+                for (int j = 0; j < board[0].length; j++) {
+                    if (board[i][j] == 0) {
+                        walls.add(new Point(i, j));
                         board[i][j] = 1;
-                        block(board, i, j, count+1, viruses);
+                        selectWall(board, viruses, walls, i, j);
                         board[i][j] = 0;
+                        walls.remove(walls.size() - 1);
                     }
                 }
             }
         }
     }
-    
-    private static void bfs(int[][] board, ArrayList<Point> viruses) {
-        int row = board.length;
-        int column = board[0].length;
-        int count = 0;
-        Queue<Point> queue = new LinkedList<>();
-        for(Point virus: viruses) {
-            queue.offer(virus);
-        }
-        while(!queue.isEmpty()) {
-            Point virus = queue.poll();
-            for(int i=0; i<dx.length; i++) {
-                int nx = virus.x + dx[i];
-                int ny = virus.y + dy[i];
-                if(nx>=0 && nx < row && ny >=0 && ny<column) {
-                    if(board[nx][ny] == 0) {
+
+    public static void bfs(int[][] board, List<Point> viruses) {
+        Deque<Point> queue = new ArrayDeque<>();
+        for (Point virus : viruses) queue.add(virus);
+
+        while (!queue.isEmpty()) {
+            Point current = queue.remove();
+            for (int i = 0; i < 4; i++) {
+                int nx = current.x + dx[i];
+                int ny = current.y + dy[i];
+                if (nx >= 0 && nx < board.length && ny >= 0 && ny < board[0].length) {
+                    if (board[nx][ny] == 0) {
                         board[nx][ny] = 2;
-                        queue.offer(new Point(nx, ny));
+                        queue.add(new Point(nx, ny));
                     }
                 }
             }
         }
-        
-        for(int i=0; i<row; i++) {
-            for(int j=0; j<column; j++) {
-                if(board[i][j]==0) {
-                    count++;
+        int area = 0;
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j] == 0) {
+                    area++;
                 }
             }
         }
-        if(count > max) {
-            max = count;
-        }
+        max = Math.max(max, area);
     }
-    
-    static class Point {
+
+    public static class Point {
         int x, y;
+
         public Point(int x, int y) {
             this.x = x;
             this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return this.x + " " + this.y;
         }
     }
 }
