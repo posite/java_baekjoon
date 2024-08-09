@@ -1,42 +1,47 @@
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.StringTokenizer;
 
-public class Main{
+public class Main {
     private static int[] dx = {-1, 1, 0, 0};
     private static int[] dy = {0, 0, -1, 1};
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
+
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
-        char[][] board = new char[x][y];
+
         boolean[][][][] visited = new boolean[x][y][x][y];
 
+        char[][] board = new char[x][y];
         Point red = null, blue = null;
         for (int i = 0; i < x; i++) {
-            String row = br.readLine();
+            String line = br.readLine();
             for (int j = 0; j < y; j++) {
-                if (row.charAt(j) == 'R') {
-                    red = new Point(i, j);
-                    board[i][j] = '.';
-                } else if (row.charAt(j) == 'B') {
+                char current = line.charAt(j);
+                board[i][j] = current;
+                if (current == 'B') {
                     blue = new Point(i, j);
-                    board[i][j] = '.';
-                } else {
-                    board[i][j] = row.charAt(j);
+                }
+                if (current == 'R') {
+                    red = new Point(i, j);
                 }
             }
         }
 
-        visited[red.x][red.y][blue.x][blue.y] = true;
         Deque<State> queue = new ArrayDeque<>();
-        queue.offer(new State(red, blue, 0));
+        queue.add(new State(red, blue, 0));
         while (!queue.isEmpty()) {
-            State current = queue.poll();
+            State current = queue.remove();
             if (current.count == 10) continue;
             red = current.red;
             blue = current.blue;
+
             for (int i = 0; i < 4; i++) {
                 Point nRed = new Point(red.x + dx[i], red.y + dy[i]);
                 Point nBlue = new Point(blue.x + dx[i], blue.y + dy[i]);
@@ -78,25 +83,24 @@ public class Main{
                     }
                 }
 
-                State nextState = new State(nRed, nBlue, current.count + 1);
                 if (isRedEscape && !isBlueEscape) {
-                    System.out.println('1');
+                    System.out.println(1);
                     return;
                 }
                 if (!isBlueEscape && !visited[nRed.x][nRed.y][nBlue.x][nBlue.y]) {
                     visited[nRed.x][nRed.y][nBlue.x][nBlue.y] = true;
-                    queue.add(nextState);
+                    queue.add(new State(nRed, nBlue, current.count + 1));
                 }
             }
         }
-        System.out.print("0");
+        System.out.println(0);
     }
 
-    private static int calculateDistance(Point before, Point after) {
+    public static int calculateDistance(Point before, Point after) {
         return Math.abs(before.x - after.x) + Math.abs(before.y - after.y);
     }
 
-    static class Point {
+    public static class Point {
         int x, y;
 
         public Point(int x, int y) {
@@ -105,7 +109,7 @@ public class Main{
         }
     }
 
-    static class State {
+    public static class State {
         Point red, blue;
         int count;
 
