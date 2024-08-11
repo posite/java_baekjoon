@@ -12,24 +12,22 @@ public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
+        int n = Integer.parseInt(st.nextToken());
+        int m = Integer.parseInt(st.nextToken());
 
-        int x = Integer.parseInt(st.nextToken());
-        int y = Integer.parseInt(st.nextToken());
-
-        boolean[][][][] visited = new boolean[x][y][x][y];
-
-        char[][] board = new char[x][y];
         Point red = null, blue = null;
-        for (int i = 0; i < x; i++) {
+        boolean[][][][] visited = new boolean[n][m][n][m];
+
+        char[][] board = new char[n][m];
+        for (int i = 0; i < n; i++) {
             String line = br.readLine();
-            for (int j = 0; j < y; j++) {
-                char current = line.charAt(j);
-                board[i][j] = current;
-                if (current == 'B') {
-                    blue = new Point(i, j);
-                }
-                if (current == 'R') {
+            for (int j = 0; j < m; j++) {
+                board[i][j] = line.charAt(j);
+                if (board[i][j] == 'R') {
                     red = new Point(i, j);
+                }
+                if (board[i][j] == 'B') {
+                    blue = new Point(i, j);
                 }
             }
         }
@@ -38,10 +36,11 @@ public class Main {
         queue.add(new State(red, blue, 0));
         while (!queue.isEmpty()) {
             State current = queue.remove();
-            if (current.count == 10) continue;
+            if (current.count == 10) {
+                continue;
+            }
             red = current.red;
             blue = current.blue;
-
             for (int i = 0; i < 4; i++) {
                 Point nRed = new Point(red.x + dx[i], red.y + dy[i]);
                 Point nBlue = new Point(blue.x + dx[i], blue.y + dy[i]);
@@ -82,18 +81,17 @@ public class Main {
                         nBlue.y -= dy[i];
                     }
                 }
-
                 if (isRedEscape && !isBlueEscape) {
-                    System.out.println(1);
+                    System.out.println("1");
                     return;
-                }
-                if (!isBlueEscape && !visited[nRed.x][nRed.y][nBlue.x][nBlue.y]) {
-                    visited[nRed.x][nRed.y][nBlue.x][nBlue.y] = true;
+                } else if (!isBlueEscape && !visited[nRed.x][nRed.y][nBlue.x][nBlue.y]) {
                     queue.add(new State(nRed, nBlue, current.count + 1));
+                    visited[nRed.x][nRed.y][nBlue.x][nBlue.y] = true;
                 }
             }
         }
-        System.out.println(0);
+
+        System.out.print("0");
     }
 
     public static int calculateDistance(Point before, Point after) {
