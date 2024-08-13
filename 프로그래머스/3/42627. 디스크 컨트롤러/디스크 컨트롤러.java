@@ -4,18 +4,19 @@ class Solution {
     public int solution(int[][] jobs) {
         int time = 0;
         int finishTime = 0;
-        int jobCount = jobs.length;
-        List<Job> remains = new ArrayList<>();
-        Queue<Job> pq = new PriorityQueue<>();
-        for(int i=0; i<jobCount; i++) {
-            pq.add(new Job(jobs[i][0], jobs[i][1]));
+        Queue<Task> pq = new PriorityQueue<>();
+        for(int i=0; i<jobs.length; i++) {
+            pq.add(new Task(jobs[i][0], jobs[i][1]));
         }
         
+        List<Task> remains = new ArrayList<>();
+        
         while(!pq.isEmpty()) {
-            Job current = pq.peek();
-            if(time >= current.inputTime) {
+            Task current = pq.peek();
+            if(current.inputTime <= time) {
                 current = pq.remove();
                 time += current.duration;
+                //System.out.println(time - current.inputTime);
                 finishTime += (time - current.inputTime);
                 pq.addAll(remains);
                 remains.clear();
@@ -23,10 +24,10 @@ class Solution {
             }
             int count = 0;
             int min = Integer.MAX_VALUE;
-            for(Job job: pq) {
-                if(job.inputTime > time) {
+            for(Task task: pq) {
+                if(task.inputTime > time) {
                     count++;
-                    min = Math.min(min, job.inputTime);
+                    min = Math.min(min, task.inputTime);
                 }
             }
             if(count == pq.size()) {
@@ -34,21 +35,22 @@ class Solution {
                 continue;
             }
             remains.add(pq.remove());
+            
         }
-        
-        return finishTime/jobCount;
+        //System.out.println(finishTime);
+        return finishTime/jobs.length;
     }
     
-    public class Job implements Comparable<Job> {
+    static class Task implements Comparable<Task> {
         int inputTime, duration;
         
-        public Job(int inputTime, int duration) {
+        public Task(int inputTime, int duration) {
             this.inputTime = inputTime;
             this.duration = duration;
         }
         
         @Override
-        public int compareTo(Job o) {
+        public int compareTo(Task o) {
             return this.duration - o.duration;
         }
     }
