@@ -2,46 +2,39 @@ import java.util.*;
 
 class Solution {
     public int solution(int n, int s, int a, int b, int[][] fares) {
+        int answer = Integer.MAX_VALUE;
+        Map<Integer, List<Point>> map = new HashMap<>();
+        for(int i=1; i<=n; i++) map.put(i, new ArrayList<>());
+        for(int[] fare: fares) {
+            map.get(fare[0]).add(new Point(fare[1], fare[2]));
+            map.get(fare[1]).add(new Point(fare[0], fare[2]));
+        }
+        
         int[] startFees = new int[n+1];
         int[] aFees = new int[n+1];
         int[] bFees = new int[n+1];
-        
-        
-        Map<Integer, List<Point>> map = new HashMap<>();
-        for(int i=1; i<=n; i++) {
-            map.put(i, new ArrayList<>());
-        }
-        for(int i=0; i<fares.length; i++) {
-            map.get(fares[i][0]).add(new Point(fares[i][1], fares[i][2]));
-            map.get(fares[i][1]).add(new Point(fares[i][0], fares[i][2]));
-        }
         
         Queue<Point> pq = new PriorityQueue<>();
         pq.add(new Point(s, 0));
         while(!pq.isEmpty()) {
             Point current = pq.remove();
-            if(current.fee > startFees[current.node]) continue;
             for(Point next: map.get(current.node)) {
                 if(next.node == s) continue;
-                int nextFee = startFees[current.node] + next.fee;
-                if(startFees[next.node] == 0 || startFees[next.node] > nextFee) {
-                    startFees[next.node] = nextFee;
-                    pq.add(new Point(next.node, nextFee));
+                if(startFees[next.node] == 0 || startFees[next.node] > startFees[current.node] + next.fee) {
+                    startFees[next.node] = startFees[current.node] + next.fee;
+                    pq.add(new Point(next.node, startFees[current.node] + next.fee));
                 }
             }
         }
         
-
         pq.add(new Point(a, 0));
         while(!pq.isEmpty()) {
             Point current = pq.remove();
-            if(current.fee > aFees[current.node]) continue;
             for(Point next: map.get(current.node)) {
                 if(next.node == a) continue;
-                int nextFee = aFees[current.node] + next.fee;
-                if(aFees[next.node] == 0 || aFees[next.node] > nextFee) {
-                    aFees[next.node] = nextFee;
-                    pq.add(new Point(next.node, nextFee));
+                if(aFees[next.node] == 0 || aFees[next.node] > aFees[current.node] + next.fee) {
+                    aFees[next.node] = aFees[current.node] + next.fee;
+                    pq.add(new Point(next.node, aFees[current.node] + next.fee));
                 }
             }
         }
@@ -49,26 +42,25 @@ class Solution {
         pq.add(new Point(b, 0));
         while(!pq.isEmpty()) {
             Point current = pq.remove();
-            if(current.fee > bFees[current.node]) continue;
             for(Point next: map.get(current.node)) {
                 if(next.node == b) continue;
-                int nextFee = bFees[current.node] + next.fee;
-                if(bFees[next.node] == 0 || bFees[next.node] > nextFee) {
-                    bFees[next.node] = nextFee;
-                    pq.add(new Point(next.node, nextFee));
+                if(bFees[next.node] == 0 || bFees[next.node] > bFees[current.node] + next.fee) {
+                    bFees[next.node] = bFees[current.node] + next.fee;
+                    pq.add(new Point(next.node, bFees[current.node] + next.fee));
                 }
             }
         }
         
-        int min = Integer.MAX_VALUE;
+        //System.out.println(Arrays.toString(startFees));
+        //System.out.println(Arrays.toString(aFees));
+        //System.out.println(Arrays.toString(bFees));
+        
         for(int i=1; i<=n; i++) {
-            if(startFees[i] == 0 && aFees[i] == 0 && bFees[i] == 0) {
-                continue;
-            }
-            min = Math.min(min, (startFees[i] + aFees[i] + bFees[i]));
+            if(startFees[i] + aFees[i] + bFees[i] == 0) continue;
+            answer = Math.min(answer, (startFees[i] + aFees[i] + bFees[i]));
         }
         
-        return min;
+        return answer;
     }
     
     public class Point implements Comparable<Point> {
