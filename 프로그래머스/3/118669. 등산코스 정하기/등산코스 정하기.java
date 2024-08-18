@@ -2,70 +2,62 @@ import java.util.*;
 
 class Solution {
     public int[] solution(int n, int[][] paths, int[] gates, int[] summits) {
-        int[] answer = new int[2];
-        Map<Integer, List<Point>> map = new HashMap<>();
+        int intensities[] = new int[n+1];
+        Arrays.sort(summits);
+        Arrays.fill(intensities, Integer.MAX_VALUE);
+        Map<Integer, List<Course>> map = new HashMap<>();
         for(int i=1; i<=n; i++) {
             map.put(i, new ArrayList<>());
         }
-        
-        for(int i=0; i<paths.length; i++) {
-            map.get(paths[i][0]).add(new Point(paths[i][1], paths[i][2]));
-            map.get(paths[i][1]).add(new Point(paths[i][0], paths[i][2]));
+        for(int[] path: paths) {
+            map.get(path[0]).add(new Course(path[1], path[2]));
+            map.get(path[1]).add(new Course(path[0], path[2]));
         }
         
-        int[] intensities = new int[n+1];
-        Arrays.fill(intensities, Integer.MAX_VALUE);
-        Queue<Point> pq = new PriorityQueue<>();
+        Queue<Course> pq = new PriorityQueue<>();
         for(int gate: gates) {
-            pq.add(new Point(gate, 0));
+            pq.add(new Course(gate, 0));
             intensities[gate] = 0;
         }
-    
+        
         outer: while(!pq.isEmpty()) {
-            Point current = pq.remove();
-            if(current.weight > intensities[current.node]) continue;
+            Course current = pq.remove();
+            if(current.intensity > intensities[current.destination]) continue;
             for(int summit: summits) {
-                if(current.node == summit) continue outer;
+                if(current.destination == summit) continue outer;
             }
             
-            for(Point next: map.get(current.node)) {
-                int nextIntensity = Math.max(current.weight, next.weight);
-                if(intensities[next.node] > nextIntensity) {
-                    pq.add(new Point(next.node, nextIntensity));
-                    intensities[next.node] = nextIntensity;
+            for(Course next: map.get(current.destination)) {
+                int nextIntensity = Math.max(next.intensity, intensities[current.destination]);
+                if(intensities[next.destination] > nextIntensity) {
+                    pq.add(new Course(next.destination, nextIntensity));
+                    intensities[next.destination] = nextIntensity;
                 }
+            }
+        }        
+        int index = -1;
+        int minIntensity = Integer.MAX_VALUE;
+        for(int summit: summits) {
+            if(minIntensity > intensities[summit]) {
+                index = summit;
+                minIntensity = intensities[summit];
             }
         }
-        int index = -1;
-        int min = Integer.MAX_VALUE;
-        
-        for(int summit: summits){
-            if(min > intensities[summit]) {
-                index = summit;
-                min = intensities[summit];
-            } else if(min == intensities[summit]) {
-                if(index > summit) {
-                    index = summit;
-                }
-            }
-        } 
-        answer[0] = index;
-        answer[1] = min;
-        
+        int[] answer = {index, minIntensity};
         return answer;
     }
     
-    public class Point implements Comparable<Point> {
-        int node, weight;
+    public class Course implements Comparable<Course> {
+        int destination, intensity;
         
-        public Point(int node, int weight) {
-            this.node = node;
-            this.weight = weight;
+        public Course(int destination, int intensity) {
+            this.destination = destination;
+            this.intensity = intensity;
         }
         
         @Override
-        public int compareTo(Point o) {
-            return this.weight - o.weight;
+        public int compareTo(Course o) {
+            return this.intensity - o.intensity;
         }
     }
 }
