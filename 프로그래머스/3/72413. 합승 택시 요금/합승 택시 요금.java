@@ -2,77 +2,82 @@ import java.util.*;
 
 class Solution {
     public int solution(int n, int s, int a, int b, int[][] fares) {
-        int answer = Integer.MAX_VALUE;
-        Map<Integer, List<Point>> map = new HashMap<>();
-        for(int i=1; i<=n; i++) map.put(i, new ArrayList<>());
-        for(int[] fare: fares) {
-            map.get(fare[0]).add(new Point(fare[1], fare[2]));
-            map.get(fare[1]).add(new Point(fare[0], fare[2]));
+        Queue<Node> pq = new PriorityQueue<>();
+        Map<Integer, List<Node>> map = new HashMap<>();
+        for(int i=1; i<=n; i++) {
+            map.put(i, new ArrayList<>());
         }
+        for(int[] fare: fares) {
+            map.get(fare[0]).add(new Node(fare[1], fare[2]));
+            map.get(fare[1]).add(new Node(fare[0], fare[2]));
+        }
+        
         
         int[] startFees = new int[n+1];
         int[] aFees = new int[n+1];
         int[] bFees = new int[n+1];
         
-        Queue<Point> pq = new PriorityQueue<>();
-        pq.add(new Point(s, 0));
+        pq.add(new Node(s, 0));
         while(!pq.isEmpty()) {
-            Point current = pq.remove();
-            for(Point next: map.get(current.node)) {
-                if(next.node == s) continue;
-                if(startFees[next.node] == 0 || startFees[next.node] > startFees[current.node] + next.fee) {
-                    startFees[next.node] = startFees[current.node] + next.fee;
-                    pq.add(new Point(next.node, startFees[current.node] + next.fee));
+            Node current = pq.remove();
+            if(current.fee > startFees[current.destination]) continue;
+            
+            for(Node next: map.get(current.destination)) {
+                if(next.destination == s) continue;
+                if(startFees[next.destination] == 0 || startFees[next.destination] > startFees[current.destination] + next.fee) {
+                    startFees[next.destination] = startFees[current.destination] + next.fee;
+                    pq.add(new Node(next.destination, startFees[next.destination]));
                 }
             }
         }
         
-        pq.add(new Point(a, 0));
+        pq.add(new Node(a, 0));
         while(!pq.isEmpty()) {
-            Point current = pq.remove();
-            for(Point next: map.get(current.node)) {
-                if(next.node == a) continue;
-                if(aFees[next.node] == 0 || aFees[next.node] > aFees[current.node] + next.fee) {
-                    aFees[next.node] = aFees[current.node] + next.fee;
-                    pq.add(new Point(next.node, aFees[current.node] + next.fee));
+            Node current = pq.remove();
+            if(current.fee > aFees[current.destination]) continue;
+            
+            for(Node next: map.get(current.destination)) {
+                if(next.destination == a) continue;
+                if(aFees[next.destination] == 0 || aFees[next.destination] > aFees[current.destination] + next.fee) {
+                    aFees[next.destination] = aFees[current.destination] + next.fee;
+                    pq.add(new Node(next.destination, aFees[next.destination]));
                 }
             }
         }
         
-        pq.add(new Point(b, 0));
+        pq.add(new Node(b, 0));
         while(!pq.isEmpty()) {
-            Point current = pq.remove();
-            for(Point next: map.get(current.node)) {
-                if(next.node == b) continue;
-                if(bFees[next.node] == 0 || bFees[next.node] > bFees[current.node] + next.fee) {
-                    bFees[next.node] = bFees[current.node] + next.fee;
-                    pq.add(new Point(next.node, bFees[current.node] + next.fee));
+            Node current = pq.remove();
+            if(current.fee > bFees[current.destination]) continue;
+            
+            for(Node next: map.get(current.destination)) {
+                if(next.destination == b) continue;
+                if(bFees[next.destination] == 0 || bFees[next.destination] > bFees[current.destination] + next.fee) {
+                    bFees[next.destination] = bFees[current.destination] + next.fee;
+                    pq.add(new Node(next.destination, bFees[next.destination]));
                 }
             }
         }
         
-        //System.out.println(Arrays.toString(startFees));
-        //System.out.println(Arrays.toString(aFees));
-        //System.out.println(Arrays.toString(bFees));
-        
+        int min = Integer.MAX_VALUE;
         for(int i=1; i<=n; i++) {
-            if(startFees[i] + aFees[i] + bFees[i] == 0) continue;
-            answer = Math.min(answer, (startFees[i] + aFees[i] + bFees[i]));
+            if(startFees[i] == 0 && aFees[i] == 0 && bFees[i] == 0) continue;
+            min = Math.min(min, (startFees[i] + aFees[i] + bFees[i]));
         }
         
-        return answer;
+        return min;
     }
     
-    public class Point implements Comparable<Point> {
-        int node, fee;
+    public class Node implements Comparable<Node> {
+        int destination, fee;
         
-        public Point(int node, int fee) {
-            this.node = node;
+        public Node(int destination, int fee) {
+            this.destination = destination;
             this.fee = fee;
         }
         
         @Override
-        public int compareTo(Point o) {
+        public int compareTo(Node o) {
             return this.fee - o.fee;
         }
     }
