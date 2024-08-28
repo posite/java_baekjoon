@@ -2,82 +2,85 @@ import java.util.*;
 
 class Solution {
     public int solution(int n, int s, int a, int b, int[][] fares) {
-        Queue<Node> pq = new PriorityQueue<>();
-        Map<Integer, List<Node>> map = new HashMap<>();
-        for(int i=1; i<=n; i++) {
-            map.put(i, new ArrayList<>());
-        }
+        final int INF = Integer.MAX_VALUE;
+        int answer = INF;
+        Map<Integer, List<Route>> map = new HashMap<>();
+        for(int i=1; i<=n; i++) map.put(i, new ArrayList<>());
         for(int[] fare: fares) {
-            map.get(fare[0]).add(new Node(fare[1], fare[2]));
-            map.get(fare[1]).add(new Node(fare[0], fare[2]));
+            map.get(fare[0]).add(new Route(fare[1], fare[2]));
+            map.get(fare[1]).add(new Route(fare[0], fare[2]));
         }
-        
         
         int[] startFees = new int[n+1];
         int[] aFees = new int[n+1];
         int[] bFees = new int[n+1];
         
-        pq.add(new Node(s, 0));
+        Arrays.fill(startFees, INF);
+        Arrays.fill(aFees, INF);
+        Arrays.fill(bFees, INF);
+        
+        Queue<Route> pq = new ArrayDeque<>();
+        pq.add(new Route(s, 0));
+        startFees[s] = 0;
         while(!pq.isEmpty()) {
-            Node current = pq.remove();
-            if(current.fee > startFees[current.destination]) continue;
-            
-            for(Node next: map.get(current.destination)) {
-                if(next.destination == s) continue;
-                if(startFees[next.destination] == 0 || startFees[next.destination] > startFees[current.destination] + next.fee) {
-                    startFees[next.destination] = startFees[current.destination] + next.fee;
-                    pq.add(new Node(next.destination, startFees[next.destination]));
+            Route current = pq.remove();
+            if(current.fee > startFees[current.node]) continue;
+            for(Route next: map.get(current.node)) {
+                int nextFee = current.fee + next.fee;
+                if(startFees[next.node] > nextFee) {
+                    pq.add(new Route(next.node, nextFee));
+                    startFees[next.node] = nextFee;
                 }
             }
         }
         
-        pq.add(new Node(a, 0));
+        pq.add(new Route(a, 0));
+        aFees[a] = 0;
         while(!pq.isEmpty()) {
-            Node current = pq.remove();
-            if(current.fee > aFees[current.destination]) continue;
-            
-            for(Node next: map.get(current.destination)) {
-                if(next.destination == a) continue;
-                if(aFees[next.destination] == 0 || aFees[next.destination] > aFees[current.destination] + next.fee) {
-                    aFees[next.destination] = aFees[current.destination] + next.fee;
-                    pq.add(new Node(next.destination, aFees[next.destination]));
+            Route current = pq.remove();
+            if(current.fee > aFees[current.node]) continue;
+            for(Route next: map.get(current.node)) {
+                int nextFee = current.fee + next.fee;
+                if(aFees[next.node] > nextFee) {
+                    pq.add(new Route(next.node, nextFee));
+                    aFees[next.node] = nextFee;
                 }
             }
         }
         
-        pq.add(new Node(b, 0));
+        pq.add(new Route(b, 0));
+        bFees[b] = 0;
         while(!pq.isEmpty()) {
-            Node current = pq.remove();
-            if(current.fee > bFees[current.destination]) continue;
-            
-            for(Node next: map.get(current.destination)) {
-                if(next.destination == b) continue;
-                if(bFees[next.destination] == 0 || bFees[next.destination] > bFees[current.destination] + next.fee) {
-                    bFees[next.destination] = bFees[current.destination] + next.fee;
-                    pq.add(new Node(next.destination, bFees[next.destination]));
+            Route current = pq.remove();
+            if(current.fee > bFees[current.node]) continue;
+            for(Route next: map.get(current.node)) {
+                int nextFee = current.fee + next.fee;
+                if(bFees[next.node] > nextFee) {
+                    pq.add(new Route(next.node, nextFee));
+                    bFees[next.node] = nextFee;
                 }
             }
         }
         
-        int min = Integer.MAX_VALUE;
         for(int i=1; i<=n; i++) {
-            if(startFees[i] == 0 && aFees[i] == 0 && bFees[i] == 0) continue;
-            min = Math.min(min, (startFees[i] + aFees[i] + bFees[i]));
+            int sum = startFees[i] + aFees[i] + bFees[i];
+            if(sum == 0) continue;
+            answer = Math.min(answer, sum);
         }
         
-        return min;
+        return answer;
     }
     
-    public class Node implements Comparable<Node> {
-        int destination, fee;
+    public class Route implements Comparable<Route> {
+        int node, fee;
         
-        public Node(int destination, int fee) {
-            this.destination = destination;
+        public Route(int node, int fee) {
+            this.node = node;
             this.fee = fee;
         }
         
-        @Override
-        public int compareTo(Node o) {
+        @Override 
+        public int compareTo(Route o) {
             return this.fee - o.fee;
         }
     }
