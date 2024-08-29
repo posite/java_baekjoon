@@ -2,46 +2,39 @@ import java.util.*;
 
 class Solution {
     public int solution(String s) {
-        if(s.length() < 2) {
-            return s.length();
-        }
-        int answer = Integer.MAX_VALUE;
         int length = s.length();
-        
-        Deque<String> stack = new ArrayDeque<>();
-        
+        if(length < 2) return length;
+        int answer = length;
         for(int i=1; i<=length/2; i++) {
-            int currentLength = 0;
+            Deque<String> stack = new ArrayDeque<>();
             int currentIndex = 0;
-            
+            int currentLength = 0;
             while(length > currentIndex) {
                 String currentString = "";
-                if(currentIndex + i > length) currentString = s.substring(currentIndex);
-                else currentString = s.substring(currentIndex, currentIndex + i);
+                if(length > currentIndex + i) currentString = s.substring(currentIndex, currentIndex + i);
+                else currentString = s.substring(currentIndex);
                 currentIndex += i;
-                
-                if(stack.isEmpty() || stack.peek().equals(currentString)) {
+                if(stack.isEmpty() || currentString.equals(stack.peek())) {
                     stack.push(currentString);
                     continue;
                 }
                 
-                String beforeString = stack.peek();
-                int beforeCount = stack.size();
+                int size = stack.size();
+                String beforeString = stack.pop();
                 stack.clear();
-                if(beforeCount > 1) currentLength += (Integer.toString(beforeCount).length() + i); 
-                else currentLength += i;
+                stack.add(currentString);
+                if(size > 1) currentLength += (beforeString.length() + Integer.toString(size).length());
+                else currentLength += beforeString.length();
                 
-                stack.push(currentString);
             }
-            
             if(!stack.isEmpty()) {
-                String lastString = stack.peek();
-                int lastCount = stack.size();
-                if(lastCount > 1) currentLength += (Integer.toString(lastCount).length() + lastString.length()); 
-                else currentLength += lastString.length();
+                int size = stack.size();
+                String beforeString = stack.pop();
+                stack.clear();
+                if(size > 1) currentLength += (beforeString.length() + Integer.toString(size).length());
+                else currentLength += beforeString.length();
             }
-            answer = Math.min(currentLength, answer);
-            stack.clear();
+            answer = Math.min(answer, currentLength);
         }
         return answer;
     }
