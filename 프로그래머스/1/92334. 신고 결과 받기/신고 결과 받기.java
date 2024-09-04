@@ -2,26 +2,28 @@ import java.util.*;
 
 class Solution {
     public int[] solution(String[] id_list, String[] report, int k) {
-        int length = id_list.length;
-        int[] answer = new int[length];
-        Map<String, Integer> indexes = new HashMap<>();
-        Map<String, Set<String>> map = new HashMap<>();
-        for(int i=0; i<length; i++) {
-            indexes.put(id_list[i], i);
-            map.put(id_list[i], new HashSet<>());
-        } 
-        for(String rep: report) {
-            StringTokenizer st = new StringTokenizer(rep);
-            String reporter = st.nextToken(), user = st.nextToken();
-            map.get(user).add(reporter);
+        StringTokenizer st;
+        int[] answer = new int[id_list.length];
+        Map<String, Integer> userIdMap = new HashMap<>();
+        Map<String, Set<String>> reportMap = new HashMap<>();
+        for(int i=0; i<id_list.length; i++) {
+            userIdMap.put(id_list[i], i);
+            reportMap.put(id_list[i], new HashSet<>());
         }
-        for(Set<String> reporters: map.values()) {
-            if(reporters.size() >= k) {
-                for(String reporter: reporters) {
-                    answer[indexes.get(reporter)]++;
+        for(String rep: report) {
+            st = new StringTokenizer(rep);
+            String reporter = st.nextToken();
+            String user = st.nextToken();
+            reportMap.get(user).add(reporter);
+        }
+        for(String id: id_list) {
+            if(reportMap.get(id).size() >= k) {
+                for(String rep: reportMap.get(id)) {
+                    answer[userIdMap.get(rep)]++;
                 }
             }
         }
+    
         return answer;
     }
 }
