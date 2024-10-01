@@ -2,21 +2,24 @@ import java.util.*;
 
 class Solution {
     public String solution(String number, int k) {
-        StringBuilder sb = new StringBuilder();
-        int len = number.length() - k;
-        int start = 0;
-        
-        while(start < number.length() && sb.length() != len) {
-            int leftNum = k + sb.length() + 1;
-            int max = 0;
-            for(int i=start; i<leftNum; i++) {
-                if(number.charAt(i) - '0' > max) {
-                    max = number.charAt(i) - '0';
-                    start = i+1;
-                }
+        List<Character> stack = new ArrayList<>();
+        int count = k;
+        for(int i=0; i<number.length(); i++) {
+            char current = number.charAt(i);
+            if(stack.isEmpty()) {
+                stack.add(current);
+                continue;
             }
-            sb.append(Integer.toString(max));
+            while(count > 0 && !stack.isEmpty()) {
+                if(current > stack.get(stack.size()-1)) {
+                    count--;
+                    stack.remove(stack.size()-1);
+                } else break;
+            }
+            stack.add(current);
         }
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<number.length()-k; i++) sb.append(stack.get(i));
         return sb.toString();
     }
 }
