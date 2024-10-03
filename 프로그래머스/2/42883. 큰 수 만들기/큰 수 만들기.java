@@ -2,24 +2,28 @@ import java.util.*;
 
 class Solution {
     public String solution(String number, int k) {
-        List<Character> stack = new ArrayList<>();
+        Deque<Character> stack = new ArrayDeque<>();
         int count = k;
         for(int i=0; i<number.length(); i++) {
             char current = number.charAt(i);
             if(stack.isEmpty()) {
-                stack.add(current);
+                stack.push(current);
                 continue;
             }
             while(count > 0 && !stack.isEmpty()) {
-                if(current > stack.get(stack.size()-1)) {
+                if(current > stack.peek()) {
                     count--;
-                    stack.remove(stack.size()-1);
+                    stack.pop();
                 } else break;
             }
-            stack.add(current);
+            stack.push(current);
+            //System.out.println(stack);
+        }
+        while(stack.size() != number.length()-k) {
+            stack.pop();
         }
         StringBuilder sb = new StringBuilder();
-        for(int i=0; i<number.length()-k; i++) sb.append(stack.get(i));
+        for(int i=0; i<number.length()-k; i++) sb.insert(0, stack.pop());
         return sb.toString();
     }
 }
